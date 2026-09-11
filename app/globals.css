@@ -209,33 +209,37 @@ strong { color: var(--c-ink); }
   box-shadow: 0 0 0 3px rgba(0,152,75,0.18), 0 0 0 5px rgba(0,152,75,0.55);
 }
 
-/* Site-wide attention pulse — every button on every page gets a subtle scale loop.
+/* Site-wide attention wobble — every button on every page rocks side to side
+   non-stop. `alternate` + ease-in-out makes it swing smoothly through the ends
+   instead of snapping, which reads as a wobble rather than a jitter. One swing is
+   0.3s, so a full left-right-left cycle is 0.6s.
    Buttons with their own colored-glow animation (.btn--cta, .btn--whatsapp) compose
-   this pulse on top via the multi-value `animation:` declarations further down,
-   so they continue to glow AND pulse together. */
+   this wobble on top via the multi-value `animation:` declarations further down,
+   so they continue to glow AND wobble together. */
 .btn {
-  animation: btnAttentionPulse 1.3s ease-in-out infinite alternate;
+  animation: btnAttentionShake 0.3s ease-in-out infinite alternate;
 }
-@keyframes btnAttentionPulse {
-  from { transform: scale(1); }
-  to   { transform: scale(1.04); }
+@keyframes btnAttentionShake {
+  from { transform: translate3d(-3px, 0, 0) rotate(-0.9deg); }
+  to   { transform: translate3d( 3px, 0, 0) rotate( 0.9deg); }
 }
-/* Pause the loop while hovered, focused or active so the user's own interaction
-   transforms (translateY, hover scale) take over without fighting the animation. */
+/* Kill the loop outright while hovered, focused or active. `paused` would freeze the
+   button mid-shake at an offset, rotated position; `none` snaps it back to rest so
+   the user's own interaction transforms (translateY, hover scale) take over. */
 .btn:hover,
 .btn:focus-visible,
 .btn:active {
-  animation-play-state: paused;
+  animation: none;
 }
 
 .btn--cta {
   background: linear-gradient(180deg, #FFC621 0%, #DF9908 100%);
   color: #000000;
   box-shadow: 0 4px 14px rgba(223, 153, 8, 0.30);
-  /* Compose two animations: the colored glow (ctaPulse) AND the universal scale pulse */
+  /* Compose two animations: the colored glow (ctaPulse) AND the universal wobble */
   animation:
     ctaPulse 2.6s ease-in-out infinite,
-    btnAttentionPulse 1.3s ease-in-out infinite alternate;
+    btnAttentionShake 0.3s ease-in-out infinite alternate;
 }
 .btn--cta:hover {
   color: #000000;
@@ -243,7 +247,7 @@ strong { color: var(--c-ink); }
   box-shadow:
     0 10px 28px rgba(223, 153, 8, 0.55),
     0 0 0 6px rgba(255, 198, 33, 0.18);
-  animation-play-state: paused;
+  animation: none;
 }
 .btn--cta:active { transform: translateY(0) scale(0.99); }
 @keyframes ctaPulse {
@@ -279,13 +283,13 @@ strong { color: var(--c-ink); }
   box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
   animation:
     waPulse 2.8s ease-in-out infinite,
-    btnAttentionPulse 1.3s ease-in-out infinite alternate;
+    btnAttentionShake 0.3s ease-in-out infinite alternate;
 }
 .btn--whatsapp:hover {
   color: #fff;
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 28px rgba(37, 211, 102, 0.5), 0 0 0 5px rgba(37, 211, 102, 0.16);
-  animation-play-state: paused;
+  animation: none;
 }
 @keyframes waPulse {
   0%, 100% { box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35); }
