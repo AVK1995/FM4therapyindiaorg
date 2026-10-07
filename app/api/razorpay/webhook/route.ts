@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { brand, pricing } from '@/lib/config';
+import { brand, pricing, normalizeAddonIds } from '@/lib/config';
+import { buildAddonFields } from '@/lib/addon-fields';
 import { sendMetaCapiEvent, sha256 } from '@/lib/meta-capi';
 import { resolveAttribution } from '@/lib/attribution';
 
@@ -214,6 +215,10 @@ export async function POST(req: NextRequest) {
 
   const externalId = email ? sha256(email.trim().toLowerCase()) : '';
 
+  // Add-ons picked at checkout (notes.add = "recordings,demo_call").
+  const addonIds = normalizeAddonIds((notes.add ?? '').split(','));
+  const addonFields = buildAddonFields(addonIds);
+
   // ─── 6. Build the Pabbly payload — same 30-field shape as before ──
   const pabblyPayload = {
     // --- existing fields (preserved from the old verify-payment payload) ---
@@ -252,6 +257,8 @@ export async function POST(req: NextRequest) {
     is_test:           'false',
     purchase_event_id: paymentId,
     fbclid:            fbclid,
+    // --- checkout add-ons (order bumps) ---
+    ...addonFields,
   };
 
   // ─── 7. Fire Pabbly (non-blocking failure handling) ───────────────

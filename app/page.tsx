@@ -107,7 +107,7 @@ export default function LandingPage() {
       <section className="section">
         <div className="container">
           <div className="stats">
-            <Stat img="/Images%20Sourabh/counter1.webp" label="Spine, Knee & Neck Pain Relieved Successfully!" count={10000} suffix="+" />
+            <Stat img="/Images%20Sourabh/counter1.webp" label="Spine, Knee & Neck Pain Relieved Successfully!" count={30000} suffix="+" />
             <Stat img="/Images%20Sourabh/counter2.png"  label="Surgeries Avoided!" count={5000} suffix="+" delay={1} />
             <Stat img="/Images%20Sourabh/counter3.webp" label="Medical Bills Saved for Patients in 10 years!" count={100} prefix="₹" suffix=" Crores+" delay={2} />
           </div>
@@ -180,7 +180,7 @@ export default function LandingPage() {
             <article className="experience__card reveal reveal-delay-1">
               <div className="experience__num">2.</div>
               <h3>Experience FM4 Therapy LIVE</h3>
-              <p>The same therapy that helped <em>10000+ people live pain-free naturally</em> — no medicines, no surgeries.</p>
+              <p>The same therapy that helped <em>30000+ people live pain-free naturally</em> — no medicines, no surgeries.</p>
             </article>
           </div>
           <div className="cta-block mt-3 reveal">
@@ -338,7 +338,7 @@ export default function LandingPage() {
             <FaqItem q="What is FM4 Therapy?" a="FM4 therapy is a proven 4-phase treatment that targets the root causes of pain in the spine, neck, and knees, providing lasting relief through non-invasive techniques. It involves identifying the cause, releasing muscle tension, strengthening weak muscles, and improving flexibility." />
             <FaqItem q="How do you deliver this therapy?" a="The 2-day live workshop is delivered entirely online via a private video conferencing room. You receive your access link by email and WhatsApp immediately after booking. The workshop is held in both Hindi and English so the entire family can participate." />
             <FaqItem q="Do I need any special equipment to join this Workshop?" a="No special equipment is needed. A smartphone, tablet, or laptop with a stable internet connection is enough. Ideally have a yoga mat or a flat carpeted area, and wear loose, comfortable clothing so you can move freely." />
-            <FaqItem q="How is this Workshop different from anything else in the market?" a="Most programs focus on temporary symptom relief — painkillers, massages, or generic exercises. FM4 Therapy is a 4-phase root-cause framework refined over 19 years and 10,000+ clients. Every participant gets a personalised pain assessment LIVE." />
+            <FaqItem q="How is this Workshop different from anything else in the market?" a="Most programs focus on temporary symptom relief — painkillers, massages, or generic exercises. FM4 Therapy is a 4-phase root-cause framework refined over 19 years and 30,000+ clients. Every participant gets a personalised pain assessment LIVE." />
             <FaqItem q="How can I join the Workshop?" a={`Click any "Book Now" button on this page, complete the secure booking through Razorpay, and you'll receive your workshop access link by email and WhatsApp. See you live on ${schedule.faqDates}.`} />
           </div>
         </div>
@@ -383,7 +383,6 @@ function Stat({ img, count, prefix = '', suffix = '+', label, delay = 0 }: { img
   return (
     <div className={cls}>
       <img className="stat__img" src={img} alt="" loading="lazy" />
-      <div className="stat__eyebrow">Cool Number</div>
       <div className="stat__num" data-count={count} data-prefix={prefix} data-suffix={suffix}>{prefix}0<sup>{suffix}</sup></div>
       <div className="stat__lab">{label}</div>
     </div>

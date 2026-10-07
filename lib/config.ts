@@ -108,7 +108,87 @@ export const brand = {
   // Public env-derived values
   whatsappUrl:
     process.env.NEXT_PUBLIC_WHATSAPP_URL || 'https://chat.whatsapp.com/',
+  /** Group for recordings buyers — recordings + bonuses are posted after Day 2. */
+  whatsappRecordingsUrl:
+    process.env.NEXT_PUBLIC_WHATSAPP_RECORDINGS_URL || 'https://chat.whatsapp.com/',
+  /** Group for private-call buyers — the booking link is posted after Day 2. */
+  whatsappPrivateCallUrl:
+    process.env.NEXT_PUBLIC_WHATSAPP_PRIVATE_CALL_URL || 'https://chat.whatsapp.com/',
 };
+
+// ── Checkout add-ons (order bumps). Prices are fixed in code so the server
+// can recompute the order total from the ids alone — the client never sends
+// an amount it could tamper with. `id` is what travels in Razorpay notes and
+// lands in the Pabbly payload, so don't rename an id once it's live.
+export type AddonId = 'recordings' | 'demo_call';
+
+export interface Addon {
+  id: AddonId;
+  badge: string;
+  title: string;
+  /** Short label for the mobile sticky bar. */
+  shortTitle: string;
+  inr: number;
+  hook: string;
+  bullets: string[];
+  tapLine: string;
+}
+
+export const addons: Addon[] = [
+  {
+    id: 'recordings',
+    badge: 'RECOMMENDED',
+    title: 'Workshop recordings, Day 1 + Day 2',
+    shortTitle: 'Add workshop recordings',
+    inr: 500,
+    hook: 'Attend live, then keep both days for good. Rewatch and redo the exercises whenever you need.',
+    bullets: [
+      'Full recording of Day 1: finding the root cause of your pain',
+      'Full recording of Day 2: rebuilding strength and flexibility',
+      'Lifetime access, no expiry date',
+      'Redo the exercises at your own pace, as many times as you need',
+      `Your live seat is still included in the ₹${pricing.client.inr}`,
+    ],
+    tapLine: 'TAP TO ADD FOR ₹500 MORE',
+  },
+  {
+    id: 'demo_call',
+    badge: 'ONE-ON-ONE',
+    title: 'Private FM4 demo call with Sourobh',
+    shortTitle: 'Add 1-on-1 call with Sourobh',
+    inr: 1500,
+    hook: 'Sourobh sir takes your FM4 demo himself. You do the exercises with him, and he tells you what to do next.',
+    bullets: [
+      'A private one-on-one call with Sourobh, not a group session',
+      'Do the FM4 exercises live with him',
+      'He gives you suggestions based on how your body responds',
+      'Ask your questions directly, with no group and no waiting',
+      'Keep your two tennis balls ready',
+      'Slot booked after registration',
+    ],
+    tapLine: 'TAP TO ADD FOR ₹1,500 MORE',
+  },
+];
+
+/** Keeps only known ids, de-duplicated, in catalogue order. */
+export function normalizeAddonIds(ids: unknown): AddonId[] {
+  const wanted = new Set(Array.isArray(ids) ? ids : []);
+  return addons.filter(a => wanted.has(a.id)).map(a => a.id);
+}
+
+export function addonsTotalInr(ids: AddonId[]): number {
+  return addons.reduce((sum, a) => (ids.includes(a.id) ? sum + a.inr : sum), 0);
+}
+
+/** Thank-you page for each add-on combination (mirrors purchase_type). */
+export function thankYouPathFor(ids: AddonId[]): string {
+  const recordings = ids.includes('recordings');
+  const call = ids.includes('demo_call');
+  if (recordings && call) return '/thank-you-all-addons';
+  if (recordings) return '/thank-you-recordings';
+  if (call) return '/thank-you-private-call';
+  return brand.thankYouPath;
+}
 
 // Submit button label, dynamically renders with current price
 export function submitButtonLabel(): string {
