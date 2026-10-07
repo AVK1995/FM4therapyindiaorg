@@ -1622,6 +1622,15 @@ strong { color: var(--c-ink); }
 .ty-group__desc  { font-size: 0.92rem; color: var(--c-ink-soft); margin: 0.55rem 0 0.85rem; line-height: 1.5; text-align: left; }
 .thanks .ty-group__btn { display: flex; width: 100%; }
 
+/* Private call booking card — gold so it reads as "book", not "join a group" */
+.ty-group--booking { background: #FFF8E6; border-color: #F0C36D; }
+.ty-group--booking .ty-group__num {
+  background: linear-gradient(135deg, var(--c-cta-from), var(--c-cta-to));
+  color: var(--c-cta-text);
+  box-shadow: 0 6px 16px var(--c-cta-shadow);
+}
+.thanks .ty-group--booking .ty-group__btn { font-size: 1rem; padding: 0.95rem 1.2rem; }
+
 /* Mobile sticky bar — every group's join button, stacked */
 .ty-sticky { display: none; }
 @media (max-width: 768px) {
@@ -1671,6 +1680,7 @@ strong { color: var(--c-ink); }
     font-weight: 800;
     flex-shrink: 0;
   }
+  .ty-sticky .btn--cta .ty-sticky__num { background: rgba(0, 0, 0, 0.12); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ty-sticky { transition: none; }
