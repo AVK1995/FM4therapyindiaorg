@@ -30,7 +30,7 @@ export type Ga4EventName =
   | 'initiate_checkout'
   | 'join_whatsapp'
   | 'join_whatsapp_recordings'
-  | 'join_whatsapp_private_call';
+  | 'book_private_call';
 
 type GtagFn = (...args: unknown[]) => void;
 

@@ -5,11 +5,13 @@ import { brand, schedule, type AddonId } from '@/lib/config';
 
 // Shared layout for the add-on thank-you pages (/thank-you-recordings,
 // /thank-you-private-call, /thank-you-all-addons). Plain /thank-you stays
-// its own page. Every page shows the workshop group + details; each add-on
-// bought adds its own WhatsApp group and details card.
+// its own page. Every page shows the workshop group + details; recordings
+// adds its WhatsApp group, the private call adds a direct cal.com booking
+// button, and each add-on gets a details card.
 
 const WORKSHOP_GROUP: JoinGroup = {
   key: 'workshop',
+  kind: 'whatsapp',
   title: 'FM4 Workshop Group',
   desc: 'Zoom link, reminders and live updates for Day 1 and Day 2.',
   cta: 'Join Workshop Group',
@@ -20,19 +22,21 @@ const WORKSHOP_GROUP: JoinGroup = {
 const ADDON_GROUPS: Record<AddonId, JoinGroup> = {
   recordings: {
     key: 'recordings',
+    kind: 'whatsapp',
     title: 'Workshop Recordings Group',
-    desc: 'Your Day 1 + Day 2 recordings and bonuses are shared here after Day 2 ends.',
+    desc: 'Your Day 1 + Day 2 recordings are shared here after Day 2 ends.',
     cta: 'Join Recordings Group',
     href: brand.whatsappRecordingsUrl,
     event: 'join_whatsapp_recordings',
   },
   demo_call: {
     key: 'demo_call',
-    title: 'Private Call Group',
-    desc: 'Your one-on-one call booking link with Sourobh is shared here after Day 2 ends.',
-    cta: 'Join Private Call Group',
-    href: brand.whatsappPrivateCallUrl,
-    event: 'join_whatsapp_private_call',
+    kind: 'booking',
+    title: 'Book Your Private Call',
+    desc: 'Pick a date and time that suits you for your one-on-one FM4 demo call with Sourobh.',
+    cta: 'Book Your Private Call',
+    href: brand.privateCallBookingUrl,
+    event: 'book_private_call',
   },
 };
 
@@ -58,22 +62,21 @@ const ADDON_DETAILS: Record<AddonId, { icon: string; title: string; bullets: str
       'Ask your questions directly, with no group and no waiting',
     ],
     extra: '🎾 Keep your two tennis balls ready for the call.',
-    delivery: 'Booking link shared in the Private Call group after Day 2 ends.',
+    delivery: 'Book your slot anytime using the "Book Your Private Call" button above.',
   },
 };
 
-const JOIN_ALL = ['', 'the WhatsApp group', 'both WhatsApp groups', 'all three WhatsApp groups'];
-
 export default function AddonThankYou({ addonIds, subtitle }: { addonIds: AddonId[]; subtitle: string }) {
   const groups = [WORKSHOP_GROUP, ...addonIds.map(id => ADDON_GROUPS[id])];
-  const sharedLater = [
-    'all bonuses',
-    ...(addonIds.includes('recordings') ? ['your workshop recordings'] : []),
-    ...(addonIds.includes('demo_call') ? ['your private call booking link'] : []),
-  ];
-  const sharedLaterText = sharedLater.length > 1
-    ? `${sharedLater.slice(0, -1).join(', ')} and ${sharedLater[sharedLater.length - 1]}`
-    : sharedLater[0];
+  const hasRecordings = addonIds.includes('recordings');
+  const hasCall = addonIds.includes('demo_call');
+
+  const groupPhrase = hasRecordings ? 'both WhatsApp groups' : 'the WhatsApp group';
+  const joinLine = `Join ${groupPhrase}${hasCall ? ' and book your private call' : ''} below.`;
+  const sharedLine = `Your Zoom link and reminders${hasRecordings ? ', and your workshop recordings,' : ''} are shared only inside ${hasRecordings ? 'these groups' : 'this group'}.`;
+  const stickyTitle = hasCall
+    ? `Join ${hasRecordings ? 'both groups' : 'the group'} & book your call`
+    : 'Join both WhatsApp groups';
 
   return (
     <>
@@ -86,12 +89,11 @@ export default function AddonThankYou({ addonIds, subtitle }: { addonIds: AddonI
             <p className="thanks__sub">{subtitle}</p>
 
             <div className="thanks__caution">
-              <strong>⚠️ Important:</strong> Join {JOIN_ALL[groups.length]} below.
-              Your Zoom link, reminders, {sharedLaterText} are shared only inside these groups.
+              <strong>⚠️ Important:</strong> {joinLine} {sharedLine}
             </div>
 
-            {/* ── WhatsApp groups (cards + mobile sticky stepper) ── */}
-            <GroupJoinPanel groups={groups} />
+            {/* ── WhatsApp groups + call booking (cards + mobile sticky bar) ── */}
+            <GroupJoinPanel groups={groups} stickyTitle={stickyTitle} />
 
             {/* ── Order details ── */}
             <h2 className="ty-section-title">Your Order</h2>
@@ -120,7 +122,9 @@ export default function AddonThankYou({ addonIds, subtitle }: { addonIds: AddonI
             })}
 
             <p className="thanks__note">
-              Everything above is shared inside the WhatsApp groups after Day 2 ends. Please stay in all the groups so you don&apos;t miss anything.
+              {hasRecordings
+                ? 'Your recordings are shared in the Workshop Recordings group after Day 2 ends. Please stay in both groups so you don’t miss anything.'
+                : 'Please stay in the WhatsApp group so you don’t miss any workshop updates.'}
             </p>
 
             <p className="thanks__signoff">{schedule.thankYouSignoff} ✨</p>

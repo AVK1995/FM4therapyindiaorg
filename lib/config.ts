@@ -111,9 +111,9 @@ export const brand = {
   /** Group for recordings buyers — recordings + bonuses are posted after Day 2. */
   whatsappRecordingsUrl:
     process.env.NEXT_PUBLIC_WHATSAPP_RECORDINGS_URL || 'https://chat.whatsapp.com/',
-  /** Group for private-call buyers — the booking link is posted after Day 2. */
-  whatsappPrivateCallUrl:
-    process.env.NEXT_PUBLIC_WHATSAPP_PRIVATE_CALL_URL || 'https://chat.whatsapp.com/',
+  /** Cal.com page where private-call buyers book their slot directly. */
+  privateCallBookingUrl:
+    process.env.NEXT_PUBLIC_PRIVATE_CALL_BOOKING_URL || 'https://cal.com/fm4therapy/fm4-therapy-demo-call',
 };
 
 // ── Checkout add-ons (order bumps). Prices are fixed in code so the server
