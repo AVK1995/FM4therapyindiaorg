@@ -107,7 +107,7 @@ export default function LandingPageHi() {
       <section className="section">
         <div className="container">
           <div className="stats">
-            <Stat img="/Images%20Sourabh/counter1.webp" label="Spine, Knee और Neck Pain Successfully Reverse हुआ!" count={10000} suffix="+" />
+            <Stat img="/Images%20Sourabh/counter1.webp" label="Spine, Knee और Neck Pain Successfully Reverse हुआ!" count={30000} suffix="+" />
             <Stat img="/Images%20Sourabh/counter2.png"  label="Surgeries Avoid हुईं!" count={5000} suffix="+" delay={1} />
             <Stat img="/Images%20Sourabh/counter3.webp" label="10 सालों में Patients की Medical Bills बचाई!" count={100} prefix="₹" suffix=" करोड़+" delay={2} />
           </div>
@@ -180,7 +180,7 @@ export default function LandingPageHi() {
             <article className="experience__card reveal reveal-delay-1">
               <div className="experience__num">2.</div>
               <h3>FM4 Therapy को LIVE Experience करें</h3>
-              <p>वही Therapy जिसने <em>10000+ लोगों को Naturally Pain-Free जीने में मदद की</em> — कोई Medicines नहीं, कोई Surgery नहीं।</p>
+              <p>वही Therapy जिसने <em>30000+ लोगों को Naturally Pain-Free जीने में मदद की</em> — कोई Medicines नहीं, कोई Surgery नहीं।</p>
             </article>
           </div>
           <div className="cta-block mt-3 reveal">
@@ -273,7 +273,7 @@ export default function LandingPageHi() {
             </div>
             <div className="instructor__body">
               <h3>Health &amp; Fitness Industry में 19 वर्षों का Expertise</h3>
-              <p>Sourobh Kulkarni ने <strong>10,000 से ज़्यादा Clients</strong> को Chronic Pain से Overcome करने में मदद की है, जिसमें Back, Neck और Knees की तकलीफ़ के साथ-साथ Mobility की कई अन्य Challenges भी शामिल हैं।</p>
+              <p>Sourobh Kulkarni ने <strong>30,000 से ज़्यादा Clients</strong> को Chronic Pain से Overcome करने में मदद की है, जिसमें Back, Neck और Knees की तकलीफ़ के साथ-साथ Mobility की कई अन्य Challenges भी शामिल हैं।</p>
             </div>
           </div>
 
@@ -338,7 +338,7 @@ export default function LandingPageHi() {
             <FaqItem q="FM4 Therapy क्या है?" a="FM4 Therapy एक Proven 4-phase Treatment है जो Spine, Neck और Knees में Pain के Root Causes को Target करती है, और Non-invasive Techniques से Lasting Relief देती है। इसमें Cause Identify करना, Muscle Tension Release करना, Weak Muscles को Strong बनाना और Flexibility Improve करना शामिल है।" />
             <FaqItem q="यह Therapy कैसे Deliver की जाती है?" a="यह 2-Day Live Workshop पूरी तरह Online — एक Private Video Conferencing Room के through Deliver की जाती है। Booking के तुरंत बाद आपको Email और WhatsApp पर Access Link मिल जाता है। Workshop Hindi और English दोनों में होती है ताकि पूरा परिवार Participate कर सके।" />
             <FaqItem q="क्या Workshop join करने के लिए कोई Special Equipment चाहिए?" a="कोई Special Equipment ज़रूरी नहीं। एक Smartphone, Tablet या Laptop और Stable Internet Connection काफ़ी है। Ideal रहेगा कि आपके पास एक Yoga Mat या Flat Carpeted Area हो, और Loose, Comfortable Clothes पहनें ताकि आप Freely Move कर सकें।" />
-            <FaqItem q="यह Workshop Market में मौजूद बाक़ी चीज़ों से कैसे अलग है?" a="ज़्यादातर Programs सिर्फ़ Temporary Symptom Relief पर Focus करते हैं — Painkillers, Massages या Generic Exercises। FM4 Therapy एक 4-phase Root-Cause Framework है जिसे 19 साल और 10,000+ Clients के साथ Refine किया गया है। हर Participant को LIVE एक Personalized Pain Assessment मिलता है।" />
+            <FaqItem q="यह Workshop Market में मौजूद बाक़ी चीज़ों से कैसे अलग है?" a="ज़्यादातर Programs सिर्फ़ Temporary Symptom Relief पर Focus करते हैं — Painkillers, Massages या Generic Exercises। FM4 Therapy एक 4-phase Root-Cause Framework है जिसे 19 साल और 30,000+ Clients के साथ Refine किया गया है। हर Participant को LIVE एक Personalized Pain Assessment मिलता है।" />
             <FaqItem q="मैं Workshop कैसे Join करूँ?" a={`इस Page पर किसी भी "Book Now" Button पर Click करें, Razorpay के through Secure Booking पूरी करें, और आपको Email व WhatsApp पर Workshop Access Link मिल जाएगा। मिलते हैं Live — ${schedule.faqDates} को।`} />
           </div>
         </div>
@@ -383,7 +383,6 @@ function Stat({ img, count, prefix = '', suffix = '+', label, delay = 0 }: { img
   return (
     <div className={cls}>
       <img className="stat__img" src={img} alt="" loading="lazy" />
-      <div className="stat__eyebrow">कूल नंबर</div>
       <div className="stat__num" data-count={count} data-prefix={prefix} data-suffix={suffix}>{prefix}0<sup>{suffix}</sup></div>
       <div className="stat__lab">{label}</div>
     </div>

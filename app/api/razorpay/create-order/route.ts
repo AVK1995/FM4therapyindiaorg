@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
-import { pricing } from '@/lib/config';
+import { pricing, normalizeAddonIds, addonsTotalInr } from '@/lib/config';
 import type { CustomerData, UtmData } from '@/lib/meta-capi';
 import {
   ATTR_COOKIE,
@@ -13,8 +13,9 @@ import {
 // Razorpay note limits (docs.razorpay.com/api/understand):
 //   - max 15 keys per notes object
 //   - each value ≤ 256 chars
-// We now use 12 keys (was 9), leaving 3 in reserve. The added keys
-// (clid, ts, rf, lu) support the L1–L6 attribution recovery pipeline.
+// We now use 13 keys (was 9), leaving 2 in reserve. The added keys
+// (clid, ts, rf, lu) support the L1–L6 attribution recovery pipeline;
+// `add` carries the comma-separated add-on ids for the webhook.
 // ─────────────────────────────────────────────────────────────────────
 const NOTE_MAX_VALUE_LEN = 256;
 
@@ -48,18 +49,21 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}));
     const {
-      amount = pricing.paise,
       currency = pricing.currency,
       customer,
       utm,
       fbclid,
     }: {
-      amount?: number;
       currency?: string;
       customer?: CustomerData;
       utm?: UtmData;
       fbclid?: string;
     } = body;
+
+    // The amount is always derived server-side from the base price + the
+    // add-on ids, so a tampered client can't change what gets charged.
+    const addonIds = normalizeAddonIds(body.addons);
+    const amount = (pricing.inr + addonsTotalInr(addonIds)) * 100;
 
     // ─── Server-side reads: cookies + headers ─────────────────────────
     const cookieFbc      = req.cookies.get('_fbc')?.value ?? '';
@@ -138,6 +142,7 @@ export async function POST(req: NextRequest) {
       rf:   truncate(resolved.referrer),
       lu:   truncate(resolved.landingUrl),
       esu:  CANONICAL_CHECKOUT_URL,
+      add:  addonIds.join(','),
     };
 
     const order = await razorpay.orders.create({

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 import { COUNTRIES, type Country } from '@/lib/countries';
 import { captureLandingParams, restoreLandingParams, restoreUtm, type UtmData } from '@/lib/utm';
-import { brand, pricing, schedule, submitButtonLabel, saveBadgeText } from '@/lib/config';
+import { brand, pricing, schedule, addons, addonsTotalInr, thankYouPathFor, type Addon, type AddonId } from '@/lib/config';
 import { setMetaAdvancedMatching, sha256Hex } from '@/lib/analytics';
 import { trackGa4EventOnce } from '@/lib/ga4';
 
@@ -245,8 +245,51 @@ function CheckoutPhoneInput({
   );
 }
 
+const formatInr = (n: number) => n.toLocaleString('en-IN');
+
+// ── Add-on (order bump) card ────────────────────────────────────────
+function AddonCard({ addon, checked, onToggle }: {
+  addon: Addon;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <label className={`addon-card${checked ? ' is-checked' : ''}`}>
+      <input
+        type="checkbox"
+        className="addon-card__input"
+        checked={checked}
+        onChange={onToggle}
+      />
+      <span className="addon-card__box" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="5 12.5 10 17.5 19 7" />
+        </svg>
+      </span>
+      <span className="addon-card__body">
+        <span className={`addon-card__badge addon-card__badge--${addon.id}`}>{addon.badge}</span>
+        <span className="addon-card__head">
+          <span className="addon-card__title">{addon.title}</span>
+          <span className="addon-card__price">+ ₹{formatInr(addon.inr)}</span>
+        </span>
+        <span className="addon-card__hook">{addon.hook}</span>
+        <ul className="addon-card__list">
+          {addon.bullets.map(b => <li key={b}>{b}</li>)}
+        </ul>
+        <span className="addon-card__tap">
+          {checked ? '✓ Added to your order · tap to remove' : addon.tapLine}
+        </span>
+      </span>
+    </label>
+  );
+}
+
 // ── Mobile order-summary accordion ──────────────────────────────────
-function MobileSummary({ finalInr, discountInr }: { finalInr: number; discountInr: number }) {
+function MobileSummary({ finalInr, discountInr, selectedAddons }: {
+  finalInr: number;
+  discountInr: number;
+  selectedAddons: AddonId[];
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className={`summary-card summary-card--mobile${open ? ' is-open' : ''}`}>
@@ -262,7 +305,7 @@ function MobileSummary({ finalInr, discountInr }: { finalInr: number; discountIn
           <span className="summary-card__toggle-meta">{open ? 'Tap to close' : 'Tap to view'}</span>
         </span>
         <span className="summary-card__toggle-right">
-          <strong>₹{finalInr}.00</strong>
+          <strong key={finalInr} className="price-bump">₹{formatInr(finalInr)}.00</strong>
           <span className={`summary-card__toggle-icon${open ? ' is-open' : ''}`} aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9" />
@@ -272,13 +315,18 @@ function MobileSummary({ finalInr, discountInr }: { finalInr: number; discountIn
       </button>
       {/* Body is ALWAYS rendered — CSS show/hides it based on `.is-open` class */}
       <div id="mobileSummaryBody">
-        <SummaryBody finalInr={finalInr} discountInr={discountInr} />
+        <SummaryBody finalInr={finalInr} discountInr={discountInr} selectedAddons={selectedAddons} />
       </div>
     </div>
   );
 }
 
-function SummaryBody({ finalInr, discountInr }: { finalInr: number; discountInr: number }) {
+function SummaryBody({ finalInr, discountInr, selectedAddons }: {
+  finalInr: number;
+  discountInr: number;
+  selectedAddons: AddonId[];
+}) {
+  const subtotal = pricing.client.inr + addonsTotalInr(selectedAddons);
   return (
     <div className="summary-card__body">
       <h3>Your Order</h3>
@@ -292,14 +340,20 @@ function SummaryBody({ finalInr, discountInr }: { finalInr: number; discountInr:
           <span className="price-new">₹{pricing.client.inr}.00</span>
         </strong>
       </div>
-      <div className="summary__row"><span>Subtotal</span><strong>₹{pricing.client.inr}.00</strong></div>
+      {addons.filter(a => selectedAddons.includes(a.id)).map(a => (
+        <div className="summary__row summary__row--addon" key={a.id}>
+          <span>{a.title}</span>
+          <strong>₹{formatInr(a.inr)}.00</strong>
+        </div>
+      ))}
+      <div className="summary__row"><span>Subtotal</span><strong>₹{formatInr(subtotal)}.00</strong></div>
       {discountInr > 0 && (
         <div className="summary__row" style={{ color: 'var(--c-primary-d)' }}>
           <span>Coupon discount</span>
-          <strong>−₹{discountInr}.00</strong>
+          <strong>−₹{formatInr(discountInr)}.00</strong>
         </div>
       )}
-      <div className="summary__row summary__row--total"><span>Total</span><span>₹{finalInr}.00</span></div>
+      <div className="summary__row summary__row--total"><span>Total</span><span key={finalInr} className="price-bump">₹{formatInr(finalInr)}.00</span></div>
 
       <div className="schedule-card">
         <div className="schedule-card__head">Workshop Schedule</div>
@@ -351,10 +405,30 @@ export default function CheckoutForm() {
   const [couponMsg, setCouponMsg]         = useState<{ ok: boolean; text: string } | null>(null);
   const [couponBusy, setCouponBusy]       = useState(false);
 
+  // Add-ons (order bumps) ticked by the visitor. The server recomputes the
+  // amount from these ids — the client total is display-only.
+  const [selectedAddons, setSelectedAddons] = useState<AddonId[]>([]);
+  const toggleAddon = useCallback((id: AddonId) => {
+    setSelectedAddons(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  }, []);
+
+  // Mobile sticky bar shows only while the in-form add-ons + pay button
+  // are scrolled out of view, so the same controls never appear twice.
+  const payAreaRef = useRef<HTMLDivElement>(null);
+  const [payAreaVisible, setPayAreaVisible] = useState(false);
+  useEffect(() => {
+    const el = payAreaRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => setPayAreaVisible(entry.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const subtotalInr = pricing.client.inr + addonsTotalInr(selectedAddons);
   const discountInr = couponPercent > 0
-    ? Math.round((pricing.client.inr * couponPercent) / 100)
+    ? Math.round((subtotalInr * couponPercent) / 100)
     : 0;
-  const finalInr = Math.max(0, pricing.client.inr - discountInr);
+  const finalInr = Math.max(0, subtotalInr - discountInr);
   const isFree = couponPercent === 100;
 
   useEffect(() => {
@@ -495,6 +569,7 @@ export default function CheckoutForm() {
               customerType: fields.customerType,
             },
             utm,
+            addons: selectedAddons,
           }),
         });
         const result = await res.json();
@@ -507,7 +582,7 @@ export default function CheckoutForm() {
         const params = new URLSearchParams(restoreLandingParams());
         params.set('funnel', brand.funnelSlug);
         if (result.paymentId) params.set('p', result.paymentId);
-        router.push(`${brand.thankYouPath}?${params.toString()}`);
+        router.push(`${thankYouPathFor(selectedAddons)}?${params.toString()}`);
       } catch (err) {
         setLoading(false);
         showToast(err instanceof Error ? err.message : 'Something went wrong.');
@@ -517,6 +592,9 @@ export default function CheckoutForm() {
 
     try {
       const selected = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
+      // Snapshot the add-ons sent to create-order, so the thank-you page
+      // always matches what was actually charged.
+      const thankYouPath = thankYouPathFor(selectedAddons);
 
       // Fire the CAPI InitiateCheckout event once per unique email per
       // browser (deduped by localStorage.fm4_ic_fired). Awaited so the
@@ -541,8 +619,8 @@ export default function CheckoutForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: pricing.client.paise,
           currency: pricing.client.currency,
+          addons: selectedAddons,
           customer: {
             firstName:    fields.firstName.trim(),
             lastName:     fields.lastName.trim(),
@@ -569,7 +647,7 @@ export default function CheckoutForm() {
 
       const rzp = new window.Razorpay({
         key: keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? '',
-        amount: amount ?? pricing.client.paise,
+        amount: amount ?? finalInr * 100,
         currency: pricing.client.currency,
         order_id: orderId,
         name: brand.modalName,
@@ -581,7 +659,7 @@ export default function CheckoutForm() {
         },
         theme: { color: brand.themeColor },
         handler: async (response: RazorpayResponse) => {
-          await handlePaymentSuccess(response, selected.dial);
+          await handlePaymentSuccess(response, selected.dial, thankYouPath);
         },
         modal: { ondismiss: () => setLoading(false) },
       });
@@ -592,7 +670,7 @@ export default function CheckoutForm() {
     }
   }
 
-  async function handlePaymentSuccess(response: RazorpayResponse, dialCode: string) {
+  async function handlePaymentSuccess(response: RazorpayResponse, dialCode: string, thankYouPath: string) {
     try {
       // Refresh MAM with the latest form values so the fm4_mam cookie
       // carries the final identity into /thank-you and every subsequent
@@ -616,7 +694,7 @@ export default function CheckoutForm() {
       const params = new URLSearchParams(restoreLandingParams());
       params.set('funnel', brand.funnelSlug);
       params.set('p', response.razorpay_payment_id);
-      router.push(`${brand.thankYouPath}?${params.toString()}`);
+      router.push(`${thankYouPath}?${params.toString()}`);
     } catch (err) {
       setLoading(false);
       showToast(err instanceof Error ? err.message : 'Something went wrong — please contact support.');
@@ -638,7 +716,7 @@ export default function CheckoutForm() {
         </div>
       )}
 
-      <MobileSummary finalInr={finalInr} discountInr={discountInr} />
+      <MobileSummary finalInr={finalInr} discountInr={discountInr} selectedAddons={selectedAddons} />
 
       <div className="checkout-main">
         {/* ── Form ── */}
@@ -649,7 +727,7 @@ export default function CheckoutForm() {
             <p>Fill in your details — your access link arrives by email &amp; WhatsApp within minutes of payment.</p>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form id="checkout-form" onSubmit={handleSubmit} noValidate>
             <div className="form-row">
               <div className="field" id="field-firstName">
                 <label htmlFor="firstName">First name <span className="req">*</span></label>
@@ -837,21 +915,36 @@ export default function CheckoutForm() {
               )}
             </div>
 
-            <button
-              type="submit"
-              className="btn btn--cta btn--lg btn--block checkout-submit"
-              disabled={loading}
-              aria-busy={loading}
-            >
-              {loading ? 'Processing…' : (
-                <>
-                  <span className="checkout-submit__text">
-                    {isFree ? 'Place Free Order' : 'Place Your Order'}
-                  </span>
-                  <span className="checkout-submit__arrow" aria-hidden="true">→</span>
-                </>
-              )}
-            </button>
+            <div ref={payAreaRef}>
+              <div className="addon-list">
+                {addons.map(a => (
+                  <AddonCard
+                    key={a.id}
+                    addon={a}
+                    checked={selectedAddons.includes(a.id)}
+                    onToggle={() => toggleAddon(a.id)}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn--cta btn--lg btn--block checkout-submit"
+                disabled={loading}
+                aria-busy={loading}
+              >
+                {loading ? 'Processing…' : (
+                  <>
+                    <span className="checkout-submit__text">
+                      {isFree ? 'Place Free Order' : (
+                        <>Place Your Order · <span key={finalInr} className="price-bump">₹{formatInr(finalInr)}</span></>
+                      )}
+                    </span>
+                    <span className="checkout-submit__arrow" aria-hidden="true">→</span>
+                  </>
+                )}
+              </button>
+            </div>
 
             <p className="secure-tag">
               {brand.trustBadges.join(' · ')}
@@ -864,8 +957,51 @@ export default function CheckoutForm() {
 
         {/* ── Desktop summary ── */}
         <aside className="summary-card summary-card--desktop" aria-label="Order summary">
-          <SummaryBody finalInr={finalInr} discountInr={discountInr} />
+          <SummaryBody finalInr={finalInr} discountInr={discountInr} selectedAddons={selectedAddons} />
         </aside>
+      </div>
+
+      {/* ── Mobile sticky add-on bar + pay button ── */}
+      <div
+        className={`checkout-sticky${payAreaVisible ? '' : ' is-visible'}`}
+        aria-hidden={payAreaVisible}
+      >
+        <div className="checkout-sticky__addons">
+          {addons.map(a => {
+            const checked = selectedAddons.includes(a.id);
+            return (
+              <label key={a.id} className={`checkout-sticky__addon${checked ? ' is-checked' : ''}`}>
+                <input
+                  type="checkbox"
+                  className="addon-card__input"
+                  checked={checked}
+                  onChange={() => toggleAddon(a.id)}
+                  tabIndex={payAreaVisible ? -1 : 0}
+                />
+                <span className="addon-card__box" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="5 12.5 10 17.5 19 7" />
+                  </svg>
+                </span>
+                <span className={`addon-card__badge addon-card__badge--${a.id}`}>{a.badge}</span>
+                <span className="checkout-sticky__label">{a.shortTitle}</span>
+                <span className="checkout-sticky__price">+ ₹{formatInr(a.inr)}</span>
+              </label>
+            );
+          })}
+        </div>
+        <button
+          type="submit"
+          form="checkout-form"
+          className="btn btn--cta btn--block checkout-sticky__pay"
+          disabled={loading}
+          tabIndex={payAreaVisible ? -1 : 0}
+        >
+          {loading ? 'Processing…' : isFree ? 'Place Free Order' : (
+            <span>Place Your Order · <span key={finalInr} className="price-bump">₹{formatInr(finalInr)}</span></span>
+          )}
+        </button>
+        <p className="checkout-sticky__note">{brand.guarantee}</p>
       </div>
     </>
   );

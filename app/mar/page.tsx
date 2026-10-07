@@ -107,7 +107,7 @@ export default function LandingPageMar() {
       <section className="section">
         <div className="container">
           <div className="stats">
-            <Stat img="/Images%20Sourabh/counter1.webp" label="मणका, गुडघे व मानदुखी यशस्वीपणे बरी झाली!" count={10000} suffix="+" />
+            <Stat img="/Images%20Sourabh/counter1.webp" label="मणका, गुडघे व मानदुखी यशस्वीपणे बरी झाली!" count={30000} suffix="+" />
             <Stat img="/Images%20Sourabh/counter2.png"  label="टाळलेल्या शस्त्रक्रिया!" count={5000} suffix="+" delay={1} />
             <Stat img="/Images%20Sourabh/counter3.webp" label="10 वर्षांत रुग्णांचा वैद्यकीय खर्च वाचवला!" count={100} prefix="₹" suffix=" कोटी+" delay={2} />
           </div>
@@ -170,7 +170,7 @@ export default function LandingPageMar() {
             <article className="experience__card reveal reveal-delay-1">
               <div className="experience__num">2.</div>
               <h3>FM4 Therapy ची LIVE अनुभूती घ्या</h3>
-              <p>तीच Therapy जिने <em>10000+ लोकांना नैसर्गिकरीत्या वेदनामुक्त जीवन दिले</em> — कोणतीही औषधे नाहीत, शस्त्रक्रिया नाही.</p>
+              <p>तीच Therapy जिने <em>30000+ लोकांना नैसर्गिकरीत्या वेदनामुक्त जीवन दिले</em> — कोणतीही औषधे नाहीत, शस्त्रक्रिया नाही.</p>
             </article>
           </div>
           <div className="cta-block mt-3 reveal">
@@ -263,7 +263,7 @@ export default function LandingPageMar() {
             </div>
             <div className="instructor__body">
               <h3>Health &amp; Fitness Industry मध्ये 19 वर्षांचा अनुभव</h3>
-              <p>सौरभ कुलकर्णी यांनी <strong>10,000 हून अधिक Clients</strong> ना Chronic वेदनेपासून बाहेर पडण्यास मदत केली आहे — यात पाठ, मान, गुडघे यांचे दुखणे तसेच Mobility च्या इतर अनेक अडचणींचा समावेश आहे.</p>
+              <p>सौरभ कुलकर्णी यांनी <strong>30,000 हून अधिक Clients</strong> ना Chronic वेदनेपासून बाहेर पडण्यास मदत केली आहे — यात पाठ, मान, गुडघे यांचे दुखणे तसेच Mobility च्या इतर अनेक अडचणींचा समावेश आहे.</p>
             </div>
           </div>
 
@@ -328,7 +328,7 @@ export default function LandingPageMar() {
             <FaqItem q="FM4 Therapy म्हणजे काय?" a="FM4 Therapy हा एक Proven 4-phase Treatment आहे जो मणका, मान आणि गुडघ्यातील वेदनेच्या मूळ कारणांवर काम करतो आणि Non-invasive Techniques द्वारे दीर्घकाळ टिकणारा आराम देतो. यात कारण ओळखणे, स्नायूंचा ताण मोकळा करणे, कमजोर स्नायू बळकट करणे आणि लवचिकता वाढवणे यांचा समावेश आहे." />
             <FaqItem q="ही Therapy तुम्ही कशी देता?" a="ही 2-Day Live Workshop पूर्णपणे Online — Private Video Conferencing Room द्वारे घेतली जाते. Booking केल्यावर लगेच तुम्हाला Email आणि WhatsApp वर Access Link मिळतो. Workshop हिंदी आणि English दोन्ही भाषांमध्ये घेतली जाते जेणेकरून संपूर्ण कुटुंब भाग घेऊ शकेल." />
             <FaqItem q="Workshop join करण्यासाठी कोणत्याही Special Equipment ची गरज आहे का?" a="Special Equipment ची काहीही गरज नाही. एक Smartphone, Tablet किंवा Laptop आणि Stable Internet Connection पुरेसे आहे. Ideal म्हणजे एक Yoga Mat किंवा सपाट Carpeted जागा असावी, आणि सैल, Comfortable कपडे घाला — जेणेकरून तुम्ही मोकळेपणाने हालचाल करू शकाल." />
-            <FaqItem q="ही Workshop Market मधील इतरांपेक्षा वेगळी कशी?" a="बहुतांश Programs फक्त तात्पुरत्या Symptom Relief वर भर देतात — Painkillers, Massages किंवा Generic Exercises. FM4 Therapy एक 4-phase Root-Cause Framework आहे — 19 वर्षे आणि 10,000+ Clients वर Refine केलेला. प्रत्येक Participant ला LIVE Personalized Pain Assessment मिळते." />
+            <FaqItem q="ही Workshop Market मधील इतरांपेक्षा वेगळी कशी?" a="बहुतांश Programs फक्त तात्पुरत्या Symptom Relief वर भर देतात — Painkillers, Massages किंवा Generic Exercises. FM4 Therapy एक 4-phase Root-Cause Framework आहे — 19 वर्षे आणि 30,000+ Clients वर Refine केलेला. प्रत्येक Participant ला LIVE Personalized Pain Assessment मिळते." />
             <FaqItem q="मी Workshop कशी Join करू?" a={`या Page वरील कोणतेही "Book Now" Button क्लिक करा, Razorpay द्वारे सुरक्षित Booking पूर्ण करा — आणि तुम्हाला Email व WhatsApp वर Workshop Access Link मिळेल. ${schedule.faqDates} ला Live भेटूया.`} />
           </div>
         </div>
@@ -373,7 +373,6 @@ function Stat({ img, count, prefix = '', suffix = '+', label, delay = 0 }: { img
   return (
     <div className={cls}>
       <img className="stat__img" src={img} alt="" loading="lazy" />
-      <div className="stat__eyebrow">कूल नंबर</div>
       <div className="stat__num" data-count={count} data-prefix={prefix} data-suffix={suffix}>{prefix}0<sup>{suffix}</sup></div>
       <div className="stat__lab">{label}</div>
     </div>

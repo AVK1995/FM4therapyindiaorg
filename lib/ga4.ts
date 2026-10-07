@@ -23,12 +23,14 @@
 
 const FLAG_PREFIX = 'fm4_ga4_';
 
-// The three events we currently track. Adding a new event = add its
+// The events we currently track. Adding a new event = add its
 // string literal here.
 export type Ga4EventName =
   | 'add_to_cart'
   | 'initiate_checkout'
-  | 'join_whatsapp';
+  | 'join_whatsapp'
+  | 'join_whatsapp_recordings'
+  | 'join_whatsapp_private_call';
 
 type GtagFn = (...args: unknown[]) => void;
 

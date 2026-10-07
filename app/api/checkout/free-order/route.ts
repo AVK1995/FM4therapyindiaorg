@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { brand, pricing } from '@/lib/config';
+import { brand, pricing, normalizeAddonIds } from '@/lib/config';
+import { buildAddonFields } from '@/lib/addon-fields';
 
 interface CustomerData {
   firstName: string;
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
       customer: CustomerData;
       utm: UtmData;
     };
+    const addonIds = normalizeAddonIds(body.addons);
 
     const expected = process.env.CHECKOUT_COUPON_CODE?.trim();
     if (!expected) {
@@ -85,6 +87,7 @@ export async function POST(req: NextRequest) {
       utm_campaign:      utm?.campaign ?? '',
       utm_content:       utm?.content  ?? '',
       utm_term:          utm?.term     ?? '',
+      ...buildAddonFields(addonIds),
     };
 
     console.log('[free-order] Test purchase via coupon:', { paymentId, email: customer.email });
